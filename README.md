@@ -39,7 +39,7 @@ The goal of HackVerse is to make it easier for developers to find opportunities 
 ### AI / Search
 
 * LangGraph
-* OpenAI Embeddings
+* GEMINI Embeddings
 * Pinecone Vector Database
 
 ---
@@ -94,7 +94,7 @@ Example:
 PORT=5000
 MONGO_URI=your_mongodb_connection
 JWT_SECRET=your_secret_key
-OPENAI_API_KEY=your_openai_key
+GEMINI_API_KEY=your_gemini_key
 PINECONE_API_KEY=your_pinecone_key
 ```
 
@@ -131,7 +131,7 @@ The backend requires the following environment variables.
 | PORT             | Backend server port          |
 | MONGO_URI        | MongoDB database connection  |
 | JWT_SECRET       | Secret for authentication    |
-| OPENAI_API_KEY   | OpenAI API key               |
+| GEMINI_API_KEY   | GEMINI API key               |
 | PINECONE_API_KEY | Pinecone vector database key |
 
 ---
