@@ -1,8 +1,70 @@
+import Hackathon from "../../models/Hackathon.js";   // 👈 add this
 import { generateEmbedding } from "../embeddings/geminiEmbedding.js";
 import { index } from "../vectorDB/pineconeClient.js";
 
+function parseDeadline(deadline) {
+
+ if (!deadline) return new Date();
+
+ const parts = deadline.split("-");
+
+ const lastPart = parts[parts.length - 1].trim();
+
+ const parsed = new Date(lastPart);
+
+ if (isNaN(parsed)) {
+  return new Date();
+ }
+
+ return parsed;
+}
+
+
 export async function processEvent(event) {
 
+
+ try {
+
+  const existing = await Hackathon.findOne({
+   title: event.title,
+   organization: event.organization
+  });
+
+  if (!existing) {
+   const normalizedMode =
+ event.mode?.toLowerCase() === "offline"
+  ? "Offline"
+  : event.mode?.toLowerCase() === "online"
+  ? "Online"
+  : "Hybrid";
+
+   await Hackathon.create({
+    title: event.title,
+    organization: event.organization,
+    location: event.location,
+    mode: event.normalizedMode,
+    prize: event.prize,
+    deadline: parseDeadline(event.deadline),
+    url: event.url,
+    skills: event.skills
+   });
+
+   console.log("Saved to MongoDB:", event.title);
+
+  } else {
+
+   console.log("Already exists in MongoDB:", event.title);
+
+  }
+
+ } catch (err) {
+
+  console.error("Mongo save error:", err.message);
+
+ }
+
+
+ 
  const text = `
 Hackathon: ${event.title}
 Organization: ${event.organization}
@@ -43,4 +105,5 @@ Prize: ${event.prize}
  });
 
  console.log("Stored:", safeId);
+
 }

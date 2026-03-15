@@ -21,6 +21,12 @@ const userSchema=new mongoose.Schema({
   type: String,
   required: true
  },
+ savedHackathons: [
+ {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "Hackathon"
+ }
+],
 
  createdAt: {
   type: Date,

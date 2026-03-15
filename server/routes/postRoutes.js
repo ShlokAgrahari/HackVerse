@@ -1,6 +1,6 @@
 import express from "express";
 import authMiddleware from "../middleware/authMiddleware.js";
-
+import upload from "../middleware/uploadMiddleware.js";
 import {
   createPost,
   getPosts,
@@ -14,7 +14,7 @@ const postRouter = express.Router();
 
 postRouter.get("/", getPosts);
 
-postRouter.post("/", authMiddleware, createPost);
+postRouter.post("/", authMiddleware,upload.array("images",5), createPost);
 
 postRouter.post("/:id/like", authMiddleware, likePost);
 

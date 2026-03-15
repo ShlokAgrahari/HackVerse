@@ -1,17 +1,40 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import HackathonCard from "../components/HackathonCard";
 import useRecommendationStore from "../store/recommendationStore";
+import api from "../services/api";
 
 function Dashboard() {
 
  const [skills, setSkills] = useState("");
+ const [savedIds, setSavedIds] = useState([]);
 
  const { results, loading, fetchRecommendations } = useRecommendationStore();
 
  const handleSearch = async () => {
   await fetchRecommendations(skills);
  };
+
+ useEffect(() => {
+
+  const fetchSavedHackathons = async () => {
+
+   try{
+
+    const res = await api.get("/hackathons/saved");
+
+    setSavedIds(res.data.map(h => h._id));
+   }catch(err){
+
+    console.error("Error fetching saved hackathons", err);
+
+   }
+
+  };
+
+  fetchSavedHackathons();
+
+ }, []);
 
  return (
 
@@ -63,8 +86,12 @@ function Dashboard() {
     {/* Results */}
     <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-     {results.map((hackathon, i) => (
-      <HackathonCard key={i} hackathon={hackathon} />
+     {results.map((hackathon) => (
+      <HackathonCard
+       key={hackathon._id}
+       hackathon={hackathon}
+       initiallySaved={savedIds.includes(hackathon._id)}
+      />
      ))}
 
     </div>

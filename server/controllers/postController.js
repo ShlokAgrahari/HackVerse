@@ -1,19 +1,37 @@
 import Post from "../models/Post.js";
 import Comment from "../models/Comment.js";
+import fs from "fs";
+import cloudinary from "../config/cloudinary.js";
 
-/* CREATE POST */
 export const createPost = async (req, res) => {
  try {
   const { title, content } = req.body;
+
+  let imageUrls = [];
+
+  if (req.files && req.files.length > 0) {
+   for (const file of req.files) {
+
+    const result = await cloudinary.uploader.upload(file.path, {
+     folder: "community_posts"
+    });
+
+    imageUrls.push(result.secure_url);
+
+    fs.unlinkSync(file.path);
+   }
+  }
 
   const post = await Post.create({
    author: req.user._id,
    authorName: req.user.name,
    title,
-   content
+   content,
+   images: imageUrls
   });
 
   const io = req.app.get("io");
+
   if (io) {
    io.emit("new_post", post);
   }
@@ -28,8 +46,6 @@ export const createPost = async (req, res) => {
  }
 };
 
-
-/* GET ALL POSTS */
 export const getPosts = async (req, res) => {
  try {
   const posts = await Post.find().sort({ createdAt: -1 });
@@ -42,7 +58,6 @@ export const getPosts = async (req, res) => {
 };
 
 
-/* LIKE POST */
 export const likePost = async (req, res) => {
  try {
 
@@ -86,7 +101,6 @@ export const likePost = async (req, res) => {
 };
 
 
-/* DISLIKE POST */
 export const dislikePost = async (req, res) => {
  try {
 
@@ -130,7 +144,6 @@ export const dislikePost = async (req, res) => {
 };
 
 
-/* ADD COMMENT */
 export const addComment = async (req, res) => {
  try {
 
@@ -164,7 +177,6 @@ export const addComment = async (req, res) => {
 };
 
 
-/* GET COMMENTS */
 export const getComments = async (req, res) => {
  try {
 

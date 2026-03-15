@@ -13,7 +13,7 @@ const useRecommendationStore = create((set)=>({
   const res = await api.post("/recommend",{
    skills
   });
-
+  console.log("API response:", res.data);
   set({
    results: res.data,
    loading:false
