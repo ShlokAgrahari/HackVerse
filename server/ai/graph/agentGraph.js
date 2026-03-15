@@ -1,17 +1,7 @@
 import { StateGraph } from "@langchain/langgraph";
 import { recommendEvents } from "../recommendEvents.js";
 
-/*
-State structure:
-{
-  query: string
-  events: Pinecone matches
-  result: formatted events for frontend
-}
-*/
 
-
-// Step 1: Plan query
 async function planQuery(state) {
 
   console.log("Planning query...");
@@ -24,7 +14,6 @@ async function planQuery(state) {
 }
 
 
-// Step 2: Retrieve from Pinecone
 async function retrieveEvents(state) {
 
   const matches = await recommendEvents(state.query);
@@ -37,7 +26,6 @@ async function retrieveEvents(state) {
 }
 
 
-// Step 3: Filter expired hackathons
 async function filterEvents(state) {
 
   const now = new Date();
@@ -72,7 +60,6 @@ async function filterEvents(state) {
   };
 }
 
-// Step 4: Rank + format for frontend
 async function rankEvents(state) {
 
   const queryWords = state.query.toLowerCase().split(" ");
@@ -104,12 +91,11 @@ async function rankEvents(state) {
 
   return {
     ...state,
-    result: ranked.slice(0, 5) // return top 5
+    result: ranked.slice(0, 5) 
   };
 }
 
 
-// Graph
 const graph = new StateGraph({
 
   channels: {

@@ -41,6 +41,7 @@ function PostPage(){
 
 },[id]);
 
+
  const addComment = async ()=>{
 
   if(!text) return;
@@ -60,7 +61,17 @@ function PostPage(){
 
  };
 
- if(!post) return <p className="text-center mt-10 text-gray-400">Loading...</p>
+
+ if(!post) 
+  return (
+   <div className="min-h-screen bg-gray-950 flex items-center justify-center text-gray-400">
+    Loading post...
+   </div>
+  );
+
+
+ const images = post.images || [];
+
 
  return(
 
@@ -79,12 +90,36 @@ function PostPage(){
      </h1>
 
      <p className="text-sm text-gray-400 mb-4">
-      Posted by {post.authorName}
+      Posted by <span className="text-purple-400">{post.authorName}</span>
      </p>
 
-     <p className="text-gray-300 leading-relaxed">
+     <p className="text-gray-300 leading-relaxed mb-6">
       {post.content}
      </p>
+
+
+     {/* Images */}
+
+     {images.length > 0 && (
+
+      <div className={`grid gap-3 ${
+       images.length === 1 ? "grid-cols-1" : "grid-cols-2"
+      }`}>
+
+       {images.map((img,index)=>(
+        <img
+         key={index}
+         src={img}
+         alt="post"
+         className={`rounded-lg object-cover w-full ${
+          images.length === 1 ? "max-h-[450px]" : "h-60"
+         }`}
+        />
+       ))}
+
+      </div>
+
+     )}
 
     </div>
 

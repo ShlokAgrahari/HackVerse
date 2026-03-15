@@ -5,6 +5,8 @@ function PostCard({ post }) {
 
  const { likePost, dislikePost } = usePostStore();
 
+ const images = post.images || [];
+
  return (
 
   <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 shadow-md hover:shadow-purple-500/10 transition">
@@ -17,13 +19,17 @@ function PostCard({ post }) {
 
    </Link>
 
-   <p className="text-sm text-gray-400 mb-4">
+   <p className="text-sm text-gray-400 mb-3">
     Posted by <span className="text-purple-400">{post.authorName}</span>
    </p>
 
    <p className="text-sm text-gray-300 mb-4 line-clamp-3">
     {post.content}
    </p>
+
+
+   
+
 
    <div className="flex items-center justify-between">
 
@@ -45,12 +51,12 @@ function PostCard({ post }) {
 
     </div>
 
-   <Link
- to={`/post/${post._id}`}
- className="text-sm font-medium bg-blue-600 hover:bg-blue-500 px-4 py-1.5 rounded transition shadow-md shadow-blue-500/20"
->
- View Post
-</Link>
+    <Link
+     to={`/post/${post._id}`}
+     className="text-sm font-medium bg-blue-600 hover:bg-blue-500 px-4 py-1.5 rounded transition shadow-md shadow-blue-500/20"
+    >
+     View Post
+    </Link>
 
    </div>
 

@@ -50,6 +50,8 @@ export const login=async(req,res)=>{
    { expiresIn: "7d" }
   );
 
+  console.log("Logged in user token is",token)
+
         res.json({
    token,
    user: {

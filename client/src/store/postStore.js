@@ -13,13 +13,22 @@ const usePostStore = create((set) => ({
 
  },
 
- createPost: async (title, content) => {
+ createPost: async (formData) => {
 
-  
-  await api.post(
-   "/posts",
-   { title, content }
-  );
+  try {
+
+   const res = await api.post(
+    "/posts",
+    formData
+   );
+
+   return res.data;
+
+  } catch (err) {
+
+   console.error("Create post failed:", err.response?.data || err.message);
+
+  }
 
  },
 

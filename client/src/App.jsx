@@ -6,7 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import Community from "./pages/Community";
 import PostPage from "./pages/PostPage";
 import ProtectedRoute from "./routes/protectedRoute";
-
+import SavedHackathons from "./pages/SavedHackathons";
 function App(){
 
  return(
@@ -41,6 +41,15 @@ function App(){
        <Dashboard/>
       </ProtectedRoute>
      }
+    />
+
+    <Route
+    path="/saved"
+    element={
+        <ProtectedRoute>
+            <SavedHackathons/>
+        </ProtectedRoute>
+    }
     />
 
    </Routes>

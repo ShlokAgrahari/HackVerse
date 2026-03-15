@@ -13,6 +13,7 @@ function Community(){
 
  const [title,setTitle] = useState("");
  const [content,setContent] = useState("");
+ const [images, setImages] = useState([]);
 
  useEffect(()=>{
 
@@ -38,16 +39,27 @@ function Community(){
 
  },[]);
 
- const handleCreate = async ()=>{
+ const handleCreate = async () => {
 
-  if(!title || !content) return;
+ if(!title || !content) return;
 
-  await createPost(title,content);
+ const formData = new FormData();
 
-  setTitle("");
-  setContent("");
+ formData.append("title", title);
+ formData.append("content", content);
 
- };
+ for(let i = 0; i < images.length; i++){
+  formData.append("images", images[i]);
+ }
+
+ await createPost(formData);
+
+ setTitle("");
+ setContent("");
+ setImages([]);
+
+};
+
 
  return(
 
@@ -84,6 +96,41 @@ function Community(){
       className="w-full bg-gray-800 border border-gray-700 rounded p-2 mb-4 text-sm focus:outline-none focus:border-purple-500"
      />
 
+     <div className="flex items-center gap-3 mb-4">
+
+ <label className="flex items-center gap-2 cursor-pointer bg-gray-800 hover:bg-gray-700 border border-gray-700 px-4 py-2 rounded-lg text-sm transition">
+
+  Add Images
+
+  <input
+   type="file"
+   multiple
+   accept="image/*"
+   onChange={(e)=>{
+    const files = Array.from(e.target.files);
+
+    if(files.length > 5){
+     alert("Maximum 5 images allowed");
+     return;
+    }
+
+    setImages(files);
+   }}
+   className="hidden"
+  />
+
+ </label>
+
+ <span className="text-sm text-gray-400">
+  {images.length > 0
+   ? `${images.length} image${images.length > 1 ? "s" : ""} selected`
+   : "Max 5 images"}
+ </span>
+
+
+</div>
+
+
      <button
  onClick={handleCreate}
  className="bg-blue-600 hover:bg-blue-500 px-5 py-2 rounded text-sm transition"
@@ -93,8 +140,7 @@ function Community(){
 
     </div>
 
-    {/* Posts Feed */}
-
+   
     <div className="flex flex-col gap-5">
 
      {posts.map(post=>(
