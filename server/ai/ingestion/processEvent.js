@@ -42,7 +42,7 @@ export async function processEvent(event) {
     title: event.title,
     organization: event.organization,
     location: event.location,
-    mode: event.normalizedMode,
+    mode: normalizedMode,
     prize: event.prize,
     deadline: parseDeadline(event.deadline),
     url: event.url,
