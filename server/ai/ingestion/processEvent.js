@@ -1,4 +1,4 @@
-import Hackathon from "../../models/Hackathon.js";   // 👈 add this
+import Hackathon from "../../models/Hackathon.js";   
 import { generateEmbedding } from "../embeddings/geminiEmbedding.js";
 import { index } from "../vectorDB/pineconeClient.js";
 
