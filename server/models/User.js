@@ -35,7 +35,18 @@ const userSchema=new mongoose.Schema({
  profilePic: {
     type: String,
     default: "https://i.pinimg.com/280x280_RS/e1/08/21/e10821c74b533d465ba888ea66daa30f.jpg"
-  }
+  },
+  googleAccessToken:{
+ type:String
+},
+
+googleRefreshToken:{
+ type:String
+},
+
+googleTokenExpiry:{
+ type:Date
+}
 })
 
 export default mongoose.model("User", userSchema);

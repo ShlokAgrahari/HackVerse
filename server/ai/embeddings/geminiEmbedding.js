@@ -1,6 +1,9 @@
 import { GoogleGenAI } from "@google/genai";
+
 import dotenv from "dotenv";
+
 dotenv.config();
+
 const genAI = new GoogleGenAI({
  apiKey: process.env.GEMINI_API_KEY
 });
@@ -8,13 +11,20 @@ const genAI = new GoogleGenAI({
 export async function generateEmbedding(text){
 
  const res = await genAI.models.embedContent({
+
   model: "gemini-embedding-001",
-  contents: text
+
+  contents: text,
+
+  config: {
+   outputDimensionality: 512
+  }
+
  });
 
  const embedding = res.embeddings[0].values;
 
-  console.log("Embedding length:", embedding.length);
+ console.log("Embedding length:", embedding.length);
 
-  return embedding;
+ return embedding;
 }

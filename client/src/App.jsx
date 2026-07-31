@@ -7,6 +7,9 @@ import Community from "./pages/Community";
 import PostPage from "./pages/PostPage";
 import ProtectedRoute from "./routes/protectedRoute";
 import SavedHackathons from "./pages/SavedHackathons";
+import GoogleSuccess
+from "./pages/GoogleSuccess";
+
 function App(){
 
  return(
@@ -51,6 +54,10 @@ function App(){
         </ProtectedRoute>
     }
     />
+    <Route
+ path="/google-success"
+ element={<GoogleSuccess />}
+/>
 
    </Routes>
 

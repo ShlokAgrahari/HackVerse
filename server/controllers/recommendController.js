@@ -1,98 +1,40 @@
-import Hackathon from "../models/Hackathon.js";
-import { agentWorkflow } from "../ai/graph/agentGraph.js";
-function parseDeadline(deadline) {
+import { agentWorkflow }
+from "../ai/graph/agentGraph.js";
 
- if (!deadline) return new Date();
+export const recommend = async (req,res)=>{
 
- const parts = deadline.split("-");
-
- const lastPart = parts[parts.length - 1].trim();
-
- const parsed = new Date(lastPart);
-
- if (isNaN(parsed)) {
-  return new Date();
- }
-
- return parsed;
-}
-
-export const recommend = async (req, res) => {
- try {
-
-  const { skills } = req.body;
-
-  if (!skills) {
-   return res.status(400).json({
-    message: "Skills are required"
-   });
-  }
+ try{
+console.log("REQ.USER =", req.user);
+  const { query } = req.body;
 
   const result = await agentWorkflow.invoke({
-   query: skills
+
+   query,
+   userId:req.user._id.toString(),
+   retryCount:0
+
   });
 
-  console.log("Agent response:", result);
+  res.json({
 
-  const vectorEvents = result.events || [];
-  const cleanResults = result.result || [];
+ events:
+  result.finalResults,
 
-  const hackathons = [];
+ toolResult:
+  result.toolResult
 
-  for (let i = 0; i < vectorEvents.length; i++) {
+});
 
-   const vectorEvent = vectorEvents[i];
-   const cleanEvent = cleanResults[i];
+ }catch(error){
 
-   let hackathon = null;
-
-   // CASE 1: metadata contains Mongo ID
-   if (vectorEvent.metadata?.hackathonId) {
-
-    hackathon = await Hackathon.findById(vectorEvent.metadata.hackathonId);
-
-   }
-
-   // CASE 2: fallback search by title
-   if (!hackathon && cleanEvent) {
-
-    hackathon = await Hackathon.findOne({
-     title: { $regex: cleanEvent.title, $options: "i" },
-     organization: { $regex: cleanEvent.organization || "", $options: "i" }
-    });
-
-   }
-
-   // CASE 3: not found in Mongo → send vector result
-   if (!hackathon && cleanEvent) {
-
-    hackathons.push({
-     _id: null,
-     title: cleanEvent.title,
-     organization: cleanEvent.organization,
-     url: cleanEvent.url,
-     skills: cleanEvent.skills,
-     deadline: null,
-     prize: 0
-    });
-
-   } else if (hackathon) {
-
-    hackathons.push(hackathon);
-
-   }
-
-  }
-
-  res.json(hackathons);
-
- } catch (error) {
-
-  console.error("Recommendation error:", error);
+  console.log(error);
 
   res.status(500).json({
-   error: "Recommendation failed"
+
+   error:error.message
+
   });
 
  }
+
 };

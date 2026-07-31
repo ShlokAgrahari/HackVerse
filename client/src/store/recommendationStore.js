@@ -1,25 +1,70 @@
 import { create } from "zustand";
 import api from "../services/api";
 
-const useRecommendationStore = create((set)=>({
+const useRecommendationStore = create((set) => ({
 
- results: [],
- loading: false,
+  results: [],
+  loading: false,
+  toolResult: null,
 
- fetchRecommendations: async (skills)=>{
+  fetchRecommendations: async (skills) => {
 
-  set({loading:true});
+    try {
 
-  const res = await api.post("/recommend",{
-   skills
-  });
-  console.log("API response:", res.data);
-  set({
-   results: res.data,
-   loading:false
-  });
+      set({
+        loading: true
+      });
 
- }
+      const res = await api.post(
+        "/recommend",
+        {
+          query: skills
+        }
+      );
+
+      console.log(
+        "API response:",
+        res.data
+      );
+
+      if (
+        res.data.toolResult?.requiresGoogleAuth
+      ) {
+
+        localStorage.setItem(
+          "pendingQuery",
+          skills
+        );
+
+        window.location.href =
+          res.data.toolResult.authUrl;
+
+        return;
+      }
+
+      set({
+
+        results:
+          res.data.events || [],
+
+        toolResult:
+          res.data.toolResult || null,
+
+        loading: false
+
+      });
+
+    } catch (err) {
+
+      console.error(err);
+
+      set({
+        loading: false
+      });
+
+    }
+
+  }
 
 }));
 
