@@ -6,14 +6,14 @@ import { Server } from "socket.io";
 import cron from "node-cron";
 
 import connectDB from "./config/db.js";
-
+import calendarRouter from "./routes/calendarRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
 import recommendRoutes from "./routes/recommendRoutes.js";
 import hackathonRoutes from "./routes/hackathonRoutes.js";
 import { crawlHackathons } from "./ai/ingestion/crawler.js";
 import { checkDeadlines } from "./scripts/reminderJob.js";
-
+import googleRouter from "./routes/googleRoutes.js";
 dotenv.config();
 
 const app = express();
@@ -22,13 +22,16 @@ connectDB();
 
 app.use(cors());
 app.use(express.json());
-
+app.use(
+ "/api/calendar",
+ calendarRouter
+);
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/recommend", recommendRoutes);
 app.use("/uploads", express.static("uploads"));
 app.use("/api/hackathons", hackathonRoutes);
-
+app.use("/api/google", googleRouter);
 const server = http.createServer(app);
 
 const io = new Server(server, {

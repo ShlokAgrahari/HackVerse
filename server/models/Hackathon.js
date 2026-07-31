@@ -32,7 +32,7 @@ const hackathonSchema = new mongoose.Schema({
 
  deadline: {
   type: Date,
-  required: true
+  required: false
  },
 
  url: {

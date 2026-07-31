@@ -2,108 +2,182 @@ import Hackathon from "../../models/Hackathon.js";
 import { generateEmbedding } from "../embeddings/geminiEmbedding.js";
 import { index } from "../vectorDB/pineconeClient.js";
 
-function parseDeadline(deadline) {
+import { generateEmbedding }
+from "../embeddings/geminiEmbedding.js";
 
- if (!deadline) return new Date();
+import { index }
+from "../vectorDB/pineconeClient.js";
 
- const parts = deadline.split("-");
+/* =========================
+   PARSE DEADLINE
+========================= */
 
- const lastPart = parts[parts.length - 1].trim();
+function parseDeadline(deadline){
 
- const parsed = new Date(lastPart);
+ if(!deadline) return null;
 
- if (isNaN(parsed)) {
-  return new Date();
+ const parsed = new Date(deadline);
+
+ if(isNaN(parsed.getTime())){
+  return null;
  }
 
  return parsed;
+
 }
 
+export async function processEvent(event){
 
-export async function processEvent(event) {
+ try{
 
+  const normalizedMode =
+   event.mode?.toLowerCase() === "offline"
+    ? "Offline"
+    : event.mode?.toLowerCase() === "online"
+    ? "Online"
+    : "Hybrid";
 
- try {
+  /* =========================
+     SAVE TO MONGODB
+  ========================= */
 
-  const existing = await Hackathon.findOne({
-   title: event.title,
-   organization: event.organization
+  let hackathon = await Hackathon.findOne({
+
+   title:event.title,
+
+   organization:event.organization
+
   });
 
-  if (!existing) {
-   const normalizedMode =
- event.mode?.toLowerCase() === "offline"
-  ? "Offline"
-  : event.mode?.toLowerCase() === "online"
-  ? "Online"
-  : "Hybrid";
+  if(!hackathon){
 
-   await Hackathon.create({
-    title: event.title,
-    organization: event.organization,
-    location: event.location,
-    mode: normalizedMode,
-    prize: event.prize,
-    deadline: parseDeadline(event.deadline),
-    url: event.url,
-    skills: event.skills
+   hackathon = await Hackathon.create({
+
+    title:event.title,
+
+    organization:event.organization,
+
+    location:event.location,
+
+    mode:normalizedMode,
+
+    prize:event.prize,
+
+    deadline:parseDeadline(event.deadline),
+
+    url:event.url,
+
+    skills:event.skills
+
    });
 
-   console.log("Saved to MongoDB:", event.title);
+   console.log(
+    "Saved to MongoDB:",
+    event.title
+   );
 
-  } else {
+  }else{
 
-   console.log("Already exists in MongoDB:", event.title);
+   console.log(
+    "Already exists in MongoDB:",
+    event.title
+   );
 
   }
 
- } catch (err) {
+  /* =========================
+     GENERATE EMBEDDING
+  ========================= */
 
-  console.error("Mongo save error:", err.message);
-
- }
-
-
- 
- const text = `
+  const text = `
 Hackathon: ${event.title}
 Organization: ${event.organization}
 Location: ${event.location}
-Mode: ${event.mode}
-Skills: ${event.skills.join(", ")}
+Mode: ${normalizedMode}
+Skills: ${(event.skills || []).join(", ")}
 Prize: ${event.prize}
 `;
 
- const embedding = await generateEmbedding(text);
+  const embedding =
+   await generateEmbedding(text);
 
- const safeId = `${event.title || "unknown"}_${event.organization || "unknown"}_${event.deadline || "unknown"}`
-  .normalize("NFKD")
-  .replace(/[^\x00-\x7F]/g, "")
-  .replace(/\s+/g, "_")
-  .replace(/[^a-zA-Z0-9_-]/g, "")
-  .toLowerCase();
+  /* =========================
+     SAFE VECTOR ID
+  ========================= */
 
- const metadata = {
-  title: event.title || "",
-  organization: event.organization || "",
-  location: event.location || "",
-  mode: event.mode || "",
-  prize: event.prize || 0,
-  deadline: event.deadline || "",
-  url: event.url || "",
-  skills: event.skills || []
- };
+  const safeId =
+   `${event.title || "unknown"}_${
+     event.organization || "unknown"
+   }`
+    .normalize("NFKD")
+    .replace(/[^\x00-\x7F]/g, "")
+    .replace(/\s+/g, "_")
+    .replace(/[^a-zA-Z0-9_-]/g, "")
+    .toLowerCase();
 
- await index.upsert({
-  records: [
-   {
-    id: safeId,
-    values: embedding,
-    metadata
-   }
-  ]
- });
+  /* =========================
+     METADATA
+  ========================= */
 
- console.log("Stored:", safeId);
+  const metadata = {
+
+   /* IMPORTANT */
+
+   mongoId:hackathon._id.toString(),
+
+   title:event.title || "",
+
+   organization:event.organization || "",
+
+   location:event.location || "",
+
+   mode:normalizedMode || "",
+
+   prize:event.prize || 0,
+
+   // deadline:hackathon.deadline || null,
+   deadline: hackathon.deadline
+    ? hackathon.deadline.toISOString()
+    : "",
+
+   url:event.url || "",
+
+   skills:event.skills || []
+
+  };
+
+  /* =========================
+     UPSERT TO PINECONE
+  ========================= */
+
+
+  console.log(metadata);
+
+  await index.upsert({
+
+   records:[
+    {
+
+     id:safeId,
+
+     values:embedding,
+
+     metadata
+
+    }
+   ]
+
+  });
+
+  console.log("Stored:", safeId);
+
+ }catch(err){
+
+  console.error(
+   "Process Event Error:",
+   err.message
+  );
+
+ }
 
 }

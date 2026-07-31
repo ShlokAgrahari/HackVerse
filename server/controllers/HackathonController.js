@@ -1,6 +1,6 @@
 import User from "../models/User.js";
 import Hackathon from "../models/Hackathon.js";
-
+import { createCalendarEvent } from "../service/googleCalendarService.js";
 export const saveHackathon = async (req,res)=>{
 
  try{
@@ -47,6 +47,25 @@ export const saveHackathon = async (req,res)=>{
 
 
   await user.save();
+
+  const hackathon =
+ await Hackathon.findById(hackathonId);
+
+if(user.googleRefreshToken){
+
+ await createCalendarEvent(
+
+  user._id,
+
+  hackathon
+
+ );
+
+ console.log(
+  "Calendar event created"
+ );
+
+}
 
   console.log("Saved hackathons after:", user.savedHackathons);
 
